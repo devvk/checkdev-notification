@@ -11,6 +11,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @SpringBootApplication
 @EnableEurekaClient
 public class NtfSrv {
+
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(NtfSrv.class);
         application.addListeners(new ApplicationPidFileWriter("./notification.pid"));
