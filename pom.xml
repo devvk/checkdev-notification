@@ -125,9 +125,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.peterarsentev</groupId>
+            <groupId>com.github.JeDiFoXxX</groupId>
             <artifactId>SpringFakeTest</artifactId>
-            <version>v.1.0.3</version>
+            <version>1.0.4</version>
         </dependency>
 
     </dependencies>
