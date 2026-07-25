@@ -11,10 +11,7 @@ public class UnKnownRequestAction implements Action {
     @Override
     public Optional<BotApiMethod> handle(Update update) {
         var chatId = update.getMessage().getChatId().toString();
-        String sl = System.lineSeparator();
-        var out = new StringBuilder();
-        out.append("Команда не поддерживается! Список доступных команд: ")
-                .append(sl).append("/start");
-        return Optional.of(new SendMessage(chatId, out.toString()));
+        var text = "Команда не поддерживается! Список доступных команд: /start";
+        return Optional.of(new SendMessage(chatId, text));
     }
 }

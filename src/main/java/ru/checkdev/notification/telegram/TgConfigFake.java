@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import ru.checkdev.notification.service.EurekaUriProvider;
 import ru.checkdev.notification.service.UserTelegramService;
 import ru.checkdev.notification.telegram.action.Action;
 import ru.checkdev.notification.telegram.action.bind.*;
@@ -40,8 +39,8 @@ public class TgConfigFake {
     @Value("${tg.token}")
     private String token;
 
-    private final EurekaUriProvider uriProvider;
-    private static final String SERVICE_ID = "site";
+    @Value("${site.login.url}")
+    private String siteLoginUrl;
 
     @Bean
     public Bot initTg() {
@@ -61,8 +60,7 @@ public class TgConfigFake {
                         new RegAskEmailAction(userTelegramService),
                         new RegPutEmailAction(sessionTg),
                         new RegCheckEmailAction(sessionTg),
-                        new RegSaveUserAction(sessionTg, tgCall, userTelegramService,
-                                String.format("%s/login", uriProvider.getUri(SERVICE_ID)))
+                        new RegSaveUserAction(sessionTg, tgCall, userTelegramService, siteLoginUrl)
                 ),
                 "/check", List.of(new CheckAction(sessionTg, tgCall, userTelegramService)),
                 "/notify", List.of(new NotifyAction(sessionTg, userTelegramService)),
@@ -72,7 +70,11 @@ public class TgConfigFake {
                         new BindAskPasswordAction(),
                         new BindPutPasswordAction(sessionTg),
                         new BindAccountAction(sessionTg, tgCall, userTelegramService)),
-                "/unbind", List.of(new UnbindAccountAction(userTelegramService))
+                "/unbind", List.of(new UnbindAskEmailAction(userTelegramService),
+                        new BindPutEmailAction(sessionTg),
+                        new BindAskPasswordAction(),
+                        new BindPutPasswordAction(sessionTg),
+                        new UnbindAccountAction(sessionTg, tgCall, userTelegramService))
         );
         TgBootFake menu = new TgBootFake(actionMap, username, token);
         return menu;

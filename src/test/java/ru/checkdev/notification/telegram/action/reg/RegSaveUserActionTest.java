@@ -14,16 +14,20 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import reactor.core.publisher.Mono;
+import ru.checkdev.notification.domain.Profile;
 import ru.checkdev.notification.repository.SubscribeTopicRepositoryFake;
 import ru.checkdev.notification.repository.UserTelegramRepositoryFake;
 import ru.checkdev.notification.service.EurekaUriProvider;
 import ru.checkdev.notification.service.UserTelegramService;
 import ru.checkdev.notification.telegram.SessionTg;
 import ru.checkdev.notification.telegram.service.FakeTgCallConsole;
+import ru.checkdev.notification.telegram.service.TgCall;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,10 +129,44 @@ class RegSaveUserActionTest {
         assertThat(actual).isEqualTo(expect);
     }
 
+    @Test
+    void whenEmailIsOccupiedThenReturnRegistrationError() {
+        message.setChat(CHAT);
+        update.setMessage(message);
+        sessionTg.put(String.valueOf(CHAT.getId()), "email", "busy@email.ru");
+        sessionTg.put(String.valueOf(CHAT.getId()), "name", "nameUser");
+        var action = new RegSaveUserAction(
+                sessionTg, new BusyEmailTgCall(), userTelegramService, URL_SITE_AUTH);
+        String expect = "Ошибка регистрации: Пользователь с такой почтой уже существует";
+
+        BotApiMethod botApiMethod = action.handle(update).get();
+        SendMessage sendMessage = (SendMessage) botApiMethod;
+
+        assertThat(sendMessage.getText()).isEqualTo(expect);
+        assertThat(userTelegramService.findByChatId(CHAT.getId())).isEmpty();
+    }
+
     private String getPassInMessage(String textMessage, String urlSiteAuth) {
         String startDelimiter = "Пароль : ";
         int startPassIndex = textMessage.indexOf(startDelimiter) + startDelimiter.length();
         int endPassIndex = textMessage.lastIndexOf(System.lineSeparator() + urlSiteAuth);
         return textMessage.substring(startPassIndex, endPassIndex);
+    }
+
+    private static class BusyEmailTgCall implements TgCall {
+        @Override
+        public Mono<Profile> doGet(String url) {
+            return Mono.empty();
+        }
+
+        @Override
+        public Mono<Object> doPost(String url, Profile profile) {
+            return Mono.just(Map.of("error", "Пользователь с такой почтой уже существует"));
+        }
+
+        @Override
+        public Mono<Object> doPost(String url) {
+            return Mono.empty();
+        }
     }
 }
