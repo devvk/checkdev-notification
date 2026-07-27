@@ -9,6 +9,8 @@ import reactor.core.publisher.Mono;
 import ru.checkdev.notification.domain.Profile;
 import ru.checkdev.notification.service.Retry;
 
+import java.time.Duration;
+
 /**
  * Класс реализует методы get и post для отправки сообщений через WebClient
  *
@@ -30,18 +32,23 @@ public class TgAuthCallWebClient implements TgCall {
     @Value("${retry.delay:1000}")
     private long delay;
 
+    @Value("${retry.timeout:5000}")
+    private long timeout;
+
     private WebClient webClient;
 
-    public TgAuthCallWebClient(String urlServiceAuth, int retries, long delay) {
+    public TgAuthCallWebClient(String urlServiceAuth, int retries, long delay, long timeout) {
         this.urlServiceAuth = urlServiceAuth;
         this.retries = retries;
         this.delay = delay;
+        this.timeout = timeout;
     }
 
-    public TgAuthCallWebClient(WebClient webClient, int retries, long delay) {
+    public TgAuthCallWebClient(WebClient webClient, int retries, long delay, long timeout) {
         this.webClient = webClient;
         this.retries = retries;
         this.delay = delay;
+        this.timeout = timeout;
     }
 
     private WebClient webClient() {
@@ -66,7 +73,8 @@ public class TgAuthCallWebClient implements TgCall {
                         .uri(uri)
                         .retrieve()
                         .bodyToMono(Profile.class)
-                        .block(), null)
+                        .block(Duration.ofMillis(timeout)),
+                null)
         );
     }
 
@@ -86,7 +94,8 @@ public class TgAuthCallWebClient implements TgCall {
                         .bodyValue(profile)
                         .retrieve()
                         .bodyToMono(Object.class)
-                        .block(), null)
+                        .block(Duration.ofMillis(timeout)),
+                null)
         );
     }
 
@@ -98,7 +107,8 @@ public class TgAuthCallWebClient implements TgCall {
                         .uri(uri)
                         .retrieve()
                         .bodyToMono(Object.class)
-                        .block(), null)
+                        .block(Duration.ofMillis(timeout)),
+                null)
         );
     }
 }

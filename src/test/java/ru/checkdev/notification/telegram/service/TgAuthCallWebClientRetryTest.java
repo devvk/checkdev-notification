@@ -32,7 +32,7 @@ class TgAuthCallWebClientRetryTest {
             }
             return Mono.just(profile);
         });
-        var client = new TgAuthCallWebClient(webClient, 3, 0);
+        var client = new TgAuthCallWebClient(webClient, 3, 0, 5000);
 
         Profile result = client.doGet("/profiles/tg/1").block();
 
@@ -60,7 +60,7 @@ class TgAuthCallWebClientRetryTest {
             }
             return Mono.just(profile);
         });
-        var client = new TgAuthCallWebClient(webClient, 3, 0);
+        var client = new TgAuthCallWebClient(webClient, 3, 0, 5000);
 
         Object result = client.doPost("/profiles/tg/byEmailAndPassword", profile).block();
 
