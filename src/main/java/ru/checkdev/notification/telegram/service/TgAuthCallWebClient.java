@@ -26,6 +26,9 @@ public class TgAuthCallWebClient implements TgCall {
     @Value("${server.auth}")
     private String urlServiceAuth;
 
+    @Value("${access.key}")
+    private String accessKey;
+
     @Value("${retry.retries:3}")
     private int retries;
 
@@ -71,6 +74,7 @@ public class TgAuthCallWebClient implements TgCall {
                 () -> webClient()
                         .get()
                         .uri(uri)
+                        .header("X-Access-Key",  accessKey)
                         .retrieve()
                         .bodyToMono(Profile.class)
                         .block(Duration.ofMillis(timeout)),
@@ -91,6 +95,7 @@ public class TgAuthCallWebClient implements TgCall {
                 () -> webClient()
                         .post()
                         .uri(uri)
+                        .header("X-Access-Key",  accessKey)
                         .bodyValue(profile)
                         .retrieve()
                         .bodyToMono(Object.class)
@@ -105,6 +110,7 @@ public class TgAuthCallWebClient implements TgCall {
                 () -> webClient()
                         .post()
                         .uri(uri)
+                        .header("X-Access-Key",  accessKey)
                         .retrieve()
                         .bodyToMono(Object.class)
                         .block(Duration.ofMillis(timeout)),

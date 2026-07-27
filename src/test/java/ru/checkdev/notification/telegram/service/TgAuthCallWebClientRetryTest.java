@@ -1,6 +1,7 @@
 package ru.checkdev.notification.telegram.service;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.checkdev.notification.domain.Profile;
@@ -23,6 +24,7 @@ class TgAuthCallWebClientRetryTest {
         var uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
         var headersSpec = mock(WebClient.RequestHeadersSpec.class);
         var responseSpec = mock(WebClient.ResponseSpec.class);
+        when(headersSpec.header("X-Access-Key", "96GcWB8a")).thenReturn(headersSpec);
         when(webClient.get()).thenReturn(uriSpec);
         when(uriSpec.uri("/profiles/tg/1")).thenReturn(headersSpec);
         when(headersSpec.retrieve()).thenReturn(responseSpec);
@@ -33,6 +35,7 @@ class TgAuthCallWebClientRetryTest {
             return Mono.just(profile);
         });
         var client = new TgAuthCallWebClient(webClient, 3, 0, 5000);
+        ReflectionTestUtils.setField(client, "accessKey", "96GcWB8a");
 
         Profile result = client.doGet("/profiles/tg/1").block();
 
@@ -52,6 +55,7 @@ class TgAuthCallWebClientRetryTest {
         var responseSpec = mock(WebClient.ResponseSpec.class);
         when(webClient.post()).thenReturn(uriSpec);
         when(uriSpec.uri("/profiles/tg/byEmailAndPassword")).thenReturn(bodySpec);
+        when(bodySpec.header("X-Access-Key", "96GcWB8a")).thenReturn(bodySpec);
         when(bodySpec.bodyValue(profile)).thenReturn(headersSpec);
         when(headersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(Object.class)).thenAnswer(invocation -> {
@@ -61,6 +65,7 @@ class TgAuthCallWebClientRetryTest {
             return Mono.just(profile);
         });
         var client = new TgAuthCallWebClient(webClient, 3, 0, 5000);
+        ReflectionTestUtils.setField(client, "accessKey", "96GcWB8a");
 
         Object result = client.doPost("/profiles/tg/byEmailAndPassword", profile).block();
 
