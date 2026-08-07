@@ -29,13 +29,13 @@ public class TgAuthCallWebClient implements TgCall {
     @Value("${access.key}")
     private String accessKey;
 
-    @Value("${retry.retries:3}")
+    @Value("${retry.retries}")
     private int retries;
 
-    @Value("${retry.delay:1000}")
+    @Value("${retry.delay}")
     private long delay;
 
-    @Value("${retry.timeout:5000}")
+    @Value("${retry.timeout}")
     private long timeout;
 
     private WebClient webClient;
